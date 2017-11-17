@@ -1,4 +1,4 @@
-function [PR,t,nn] = piano_roll(Notes,vel,ts)
+function [PR,t,nn] = piano_roll(Notes,vel,ts,auto_shrink)
 %
 % Inputs:
 %  Notes: A 'notes' matrix as returned from midiInfo.m
@@ -22,6 +22,9 @@ end
 if nargin < 3
   ts = 0.01;
 end
+if nargin < 4
+    auto_shrink = true;
+end
 
 Nnotes = size(Notes,1);
 
@@ -35,7 +38,11 @@ else
 end
 
 Notes(:,3) = Notes(:,3) + (Notes(:,3)==0); % correct zeros in the tone
-PR = zeros(max(Notes(:,3)), max(n2));
+if(auto_shrink)
+    PR = zeros(max(Notes(:,3)), max(n2));
+else
+    PR = zeros(128, max(n2));
+end
 
 for i=1:Nnotes
   PR(Notes(i,3), n1(i):n2(i)) = vals(i);
@@ -44,6 +51,10 @@ end
 % create quantized time axis:
 t = linspace(0,max(Notes(:,6)),size(PR,2));
 % note axis:
-nn = min(Notes(:,3)):max(Notes(:,3));
+if(auto_shrink)
+    nn = min(Notes(:,3)):max(Notes(:,3));
+else
+    nn = 1:128;
+end
 % truncate to notes used:
 PR = PR(nn,:);
